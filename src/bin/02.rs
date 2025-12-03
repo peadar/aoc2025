@@ -134,6 +134,7 @@ pub fn main() -> io::Result<()> {
     println!("part1: {}", p1);
 
     file.seek(SeekFrom::Start(0))?;
+
     let mut reader = BufReader::new(&mut file);
     let start = Instant::now();
     let p2 = part2(&mut reader)?;
