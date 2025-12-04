@@ -33,6 +33,7 @@ fn part2<R : BufRead>(reader : &mut R) -> io::Result<u64> {
 fn main() -> io::Result<()> {
     let name = env::args().nth(1).ok_or_else(|| aoc2025::ioerr( "no input file specified"))?;
     let mut file = File::open(&name)?;
+
     let mut reader = BufReader::new(&mut file);
     let p1 = part1(&mut reader)?;
     println!("part1: {}", p1);
@@ -42,5 +43,6 @@ fn main() -> io::Result<()> {
     let mut reader = BufReader::new(&mut file);
     let p2 = part2(&mut reader)?;
     println!("part2: {}", p2);
+
     Ok(())
 }
