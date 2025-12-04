@@ -1,5 +1,4 @@
 use std::env;
-use std::mem;
 use std::fs::File;
 use std::io::{self,BufReader, BufRead, Seek, SeekFrom};
 use aoc2025;
@@ -80,54 +79,46 @@ fn parse_input<T : From<u8>, R : BufRead>(reader : &mut R) -> io::Result<Vec<Vec
     Ok(grid)
 }
 
-fn part1<R : BufRead>(reader : &mut R) -> io::Result<u64> {
-    let grid = parse_input::<Cell, R>(reader)?;
-    let mut tot = 0u64;
-    for row in 0..grid.height() {
-        for col in 0..grid.width() {
-            match grid.at(row, col) {
+fn mill_iterate(inp : Vec<Vec<Cell>>) -> (u64, Vec<Vec<Cell>> ) {
+    let mut out = new_mill(inp.height(), inp.width());
+
+    let mut changed = 0;
+    for row in 0..inp.height() {
+        for col in 0..inp.width() {
+            match inp.at(row, col) {
                 Cell::Paper => {
-                    if grid.count_around(row, col) < 4 {
-                        tot += 1;
+                    if inp.count_around(row, col) < 4 {
+                        changed += 1;
+                        out.set(row, col, Cell::Empty);
+                    } else {
+                        out.set(row, col, Cell::Paper);
                     }
                 },
-                _ => (),
-            }
-        }
-    }
-    Ok(tot)
-}
-
-fn part2<R : BufRead>(reader : &mut R) -> io::Result<u64> {
-    let mut ping = parse_input::<Cell, R>(reader)?;
-    let mut pong = new_mill(ping.height(), ping.width());
-
-    let mut tot = 0u64;
-
-    loop {
-        let mut changed = 0;
-        for row in 0..ping.height() {
-            for col in 0..ping.width() {
-                match ping.at(row, col) {
-                    Cell::Paper => {
-                        if ping.count_around(row, col) < 4 {
-                            changed += 1;
-                            pong.set(row, col, Cell::Empty);
-                        } else {
-                            pong.set(row, col, Cell::Paper);
-                        }
-                    },
-                    other => {
-                        pong.set(row, col, other);
-                    }
+                other => {
+                    out.set(row, col, other);
                 }
             }
         }
+    }
+    (changed, out)
+}
+
+fn part1<R : BufRead>(reader : &mut R) -> io::Result<u64> {
+    let grid = parse_input::<Cell, R>(reader)?;
+    let (changed, _ ) = mill_iterate(grid);
+    Ok(changed)
+}
+
+fn part2<R : BufRead>(reader : &mut R) -> io::Result<u64> {
+    let mut grid = parse_input::<Cell, R>(reader)?;
+    let mut tot = 0u64;
+    loop {
+        let (changed, gridnew) = mill_iterate(grid);
         if changed == 0 {
             break;
         }
-        mem::swap( &mut ping , &mut pong );
         tot += changed;
+        grid = gridnew;
     }
     Ok(tot)
 }
