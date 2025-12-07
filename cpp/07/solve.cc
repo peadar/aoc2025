@@ -23,7 +23,7 @@ public:
     BitSeq operator >> (size_t qty) const { return shift(qty); }
 
     unsigned popcount() const {
-        return std::accumulate(bitseq.begin(), bitseq.end(), BitInt(0), [](BitInt accum, BitInt v){ return __builtin_popcountll( v ); });
+        return std::accumulate(bitseq.begin(), bitseq.end(), BitInt(0), [](BitInt accum, BitInt v){ return accum + __builtin_popcountll( v ); });
     }
 
     template <typename Op, typename ...Args>
@@ -69,12 +69,11 @@ public:
         else
             this->clr(offset);
     }
-
     auto operator<=>(const BitSeq &) const = default;
 
 private:
-    std::vector<BitInt> bitseq;
     static constexpr unsigned BitsPerInt = sizeof(BitInt) * 8;
+    std::vector<BitInt> bitseq{};
     size_t size_{};
 
     template <typename Op>
@@ -96,8 +95,7 @@ private:
                 // we want the low bits from the next word in the high bits for this one
                 value >>= abs(shift);
                 value |= next << (BitsPerInt + shift);
-            }
-            if (shift > 0) {
+            } else if (shift > 0) {
                 // we want the high bits from the prev word in the low bits for this one
                 value <<= shift;
                 value |= prev >> (BitsPerInt - shift);
@@ -126,15 +124,12 @@ void part1(std::istream &is, std::ostream &os) {
     std::string l;
     std::getline(is, l);
     BitSeq flow{l, 'S'};
-
     unsigned branches = 0;
     while ( std::getline(is, l) ) {
         BitSeq seq{l, '^'};
         BitSeq collide = seq & flow;
         branches += collide.popcount();
-        flow = flow & ~collide;
-        flow = flow | (collide << 1);
-        flow = flow | (collide >> 1);
+        flow = flow & ~collide | collide << 1 | collide >> 1;
     }
     os << branches;
 }
@@ -145,7 +140,7 @@ void part2(std::istream &is, std::ostream &os) {
     std::getline(is, l);
 
     BitSeq flow{l, 'S'};
-    std::vector<uint64_t> counts{flow.size()};
+    std::vector<uint64_t> counts(flow.size());
 
     flow.foreachbit( [&counts] (size_t bit) { counts[bit] = 1; });
 
