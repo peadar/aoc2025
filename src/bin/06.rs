@@ -8,12 +8,6 @@ struct Solution {
     sums : Vec<u64>
 }
 
-struct Solution2 {
-    products : Vec<u64>,
-    sums : Vec<u64>
-}
-
-
 impl Solution {
     fn new () -> Self {
         Self {
@@ -31,14 +25,14 @@ impl Solution {
             self.sums[idx] += val;
         }
     }
+
     fn accumulate (&mut self, input : Vec<&str> ) -> u64 {
         let mut tot = 0u64;
         for (idx, val) in input.iter().enumerate() {
             tot += match *val {
               "+" => self.sums[idx],
               "*" => self.products[idx],
-            _ => panic!("oh noes"),
-
+               _ => panic!("oh noes"),
             }
         }
         tot
@@ -111,7 +105,7 @@ fn main() -> io::Result<()> {
     let mut file = File::open(&name)?;
 
     println!("part1: {}", part1(&mut BufReader::new(&mut file)).unwrap());
-    file.seek(SeekFrom::Start(0));
+    file.seek(SeekFrom::Start(0))?;
     println!("part1: {}", part2(&mut BufReader::new(&mut file)).unwrap());
     Ok(())
 }

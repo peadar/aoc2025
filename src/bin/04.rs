@@ -33,7 +33,6 @@ fn new_mill( rows : isize, cols : isize ) -> Vec<Vec<Cell>> {
 }
 
 impl PaperMill for Vec<Vec<Cell>> {
-
     fn width(&self) -> isize {
         self[0].len() as isize
     }
@@ -81,7 +80,6 @@ fn parse_input<T : From<u8>, R : BufRead>(reader : &mut R) -> io::Result<Vec<Vec
 
 fn mill_iterate(inp : Vec<Vec<Cell>>) -> (u64, Vec<Vec<Cell>> ) {
     let mut out = new_mill(inp.height(), inp.width());
-
     let mut changed = 0;
     for row in 0..inp.height() {
         for col in 0..inp.width() {

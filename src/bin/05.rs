@@ -30,8 +30,8 @@ struct Input {
 impl Input {
     fn from_reader<R : BufRead>(reader : R) -> io::Result<Self> {
 
-        let mut ranges : Vec<Range> = Vec::new();
-        let mut ingredients : Vec<u64> = Vec::new();
+        let mut ranges : Vec<Range> = Vec::with_capacity(200);
+        let mut ingredients : Vec<u64> = Vec::with_capacity(1000);
 
         let mut lines = reader.lines();
 
@@ -54,7 +54,7 @@ impl Input {
         // Canonicalize by sorting, then merging overlapping/adjacent ranges.
         ingredients.sort();
         ranges.sort_by_key(|x| x.start);
-        let mut reduced_ranges = Vec::new();
+        let mut reduced_ranges = Vec::with_capacity(ranges.len());
         if let Some(&first) = ranges.first(){
             reduced_ranges.push(first);
             for r in ranges.iter().skip(1) {
