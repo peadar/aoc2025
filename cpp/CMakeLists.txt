@@ -12,3 +12,4 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(lib)
 add_subdirectory(07)
+add_subdirectory(08)

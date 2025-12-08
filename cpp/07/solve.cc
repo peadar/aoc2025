@@ -1,6 +1,3 @@
-#include <assert.h>
-#include <iostream>
-#include <vector>
 #include <numeric>
 #include "aoc.h"
 
@@ -23,14 +20,16 @@ public:
     BitSeq operator >> (size_t qty) const { return shift(qty); }
 
     unsigned popcount() const {
-        return std::accumulate(bitseq.begin(), bitseq.end(), BitInt(0), [](BitInt accum, BitInt v){ return accum + __builtin_popcountll( v ); });
+        return std::accumulate(bitseq.begin(), bitseq.end(), BitInt(0),
+                               [](BitInt accum, BitInt v){ return accum + __builtin_popcountll( v ); });
     }
 
     template <typename Op, typename ...Args>
     void foreachbit(Op op, Args... args) const {
-        for (size_t i = 0; i < bitseq.size(); ++i) {
+        size_t wordsize = bitseq.size();
+        for (size_t i = 0; i < wordsize; ++i) {
             auto val = bitseq[i] ;
-            auto wordbits = i == bitseq.size() - 1 ? size_ % BitsPerInt : BitsPerInt;
+            auto wordbits = i == wordsize - 1 ? size_ % BitsPerInt : BitsPerInt;
             while (val) {
                 auto bit = __builtin_ctzll(val);
                 if (bit >= wordbits)
@@ -65,9 +64,9 @@ public:
 
     void put(size_t offset, bool what) {
         if (what)
-            this->set(offset);
+            set(offset);
         else
-            this->clr(offset);
+            clr(offset);
     }
     auto operator<=>(const BitSeq &) const = default;
 
@@ -86,9 +85,7 @@ private:
 
     BitSeq shift( int shift ) const {
         BitSeq result(size());
-        BitInt prev = 0;
-        BitInt cur = bitseq[0];
-        BitInt next = bitseq.size() ? bitseq[1] : 0;
+        BitInt prev = 0, cur = bitseq[0], next = bitseq.size() ? bitseq[1] : 0;
         for (size_t i = 0;; ) {
             BitInt value = cur;
             if (shift < 0) {
@@ -103,9 +100,8 @@ private:
             result.bitseq[i] = value;
             prev = cur;
             cur = next;
-            if (++i == bitseq.size()) {
+            if (++i == bitseq.size())
                 break;
-            }
             next = i <= bitseq.size() ? bitseq[i+1] : 0;
         }
         return result;
@@ -125,7 +121,7 @@ void part1(std::istream &is, std::ostream &os) {
     std::getline(is, l);
     BitSeq flow{l, 'S'};
     unsigned branches = 0;
-    while ( std::getline(is, l) ) {
+    while (std::getline(is, l)) {
         BitSeq seq{l, '^'};
         BitSeq collide = seq & flow;
         branches += collide.popcount();
@@ -135,15 +131,11 @@ void part1(std::istream &is, std::ostream &os) {
 }
 
 void part2(std::istream &is, std::ostream &os) {
-
     std::string l;
     std::getline(is, l);
-
     BitSeq flow{l, 'S'};
     std::vector<uint64_t> counts(flow.size());
-
     flow.foreachbit( [&counts] (size_t bit) { counts[bit] = 1; });
-
     while ( std::getline(is, l) ) {
         BitSeq seq{l, '^'};
         std::vector<uint64_t> next = counts;
