@@ -12,9 +12,9 @@ using Circuit = std::vector<Point *>;
 
 struct Point {
     Scalar x, y, z;
-    std::shared_ptr<Circuit> circuit;
+    Circuit *circuit;
     Point(const std::string &txt)
-        : circuit { std::make_shared<Circuit>() }
+        : circuit {new Circuit{}}
     {
         std::string line {txt};
         x = aoc::parsetoken<Scalar>(line, ",");
@@ -46,7 +46,7 @@ struct Puzzle {
     std::vector<Point> points;
     std::vector<Distance> distances;
 
-    void parse(std::istream &is, std::ostream &os) {
+    void parse(std::istream &is) {
         std::string l;
         while (std::getline(is, l))
             points.emplace_back(l);
@@ -61,13 +61,12 @@ struct Puzzle {
                 distances.emplace_back(&ip,&jp,sqd);
             }
         }
-        std::sort(distances.begin(), distances.end());
     }
 
     Scalar best(const Distance &d, int iter) {
         std::array<Circuit *, 4> best{};
         for (auto &p : points) {
-            best[3] = p.circuit.get();
+            best[3] = p.circuit;
             for (size_t i = 0; i < 3; ++i) {
                 if (best[3] == best[i]) {
                     best[3] = nullptr;
@@ -98,21 +97,23 @@ struct Puzzle {
         }
     }
 
-    void part1() {
+    void part1(std::ostream &os) {
         size_t i;
+        std::sort(distances.begin(), distances.end());
         for (i = 0; i < std::min(distances.size(), 1000UL); ++i) {
             merge(distances[i]);
         }
-        std::cout << best(distances[0], i);
+        os <<best(distances[0], i);
     }
 
-    void part2() {
+    void part2(std::ostream &os) {
         size_t i;
+        std::sort(distances.begin(), distances.end());
         for (i = 0;; ++i) {
             auto &d = distances[i];
             merge(d);
             if (d.points.first->circuit->size() == points.size()) {
-                std::cout << d.points.first->x * d.points.second->x;
+                os << d.points.first->x * d.points.second->x;
                 break;
             }
         }
@@ -122,16 +123,25 @@ struct Puzzle {
 aoc::Case P1{"part1", [](std::istream &is, std::ostream &os)
     {
         Puzzle pz;
-        pz.parse(is, os); 
-        pz.part1();
+        pz.parse(is); 
+        pz.part1(os);
     }
 };
 
 aoc::Case P2{"part2", [](std::istream &is, std::ostream &os)
     {
         Puzzle pz;
-        pz.parse(is, os); 
-        pz.part2();
+        pz.parse(is); 
+        pz.part2(os);
     }
 };
+
+aoc::Case P3{"parseonly", [](std::istream &is, std::ostream &os)
+    {
+        Puzzle pz;
+        pz.parse(is); 
+    }
+};
+
+
 }
